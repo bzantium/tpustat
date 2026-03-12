@@ -1,0 +1,101 @@
+from __future__ import annotations
+
+from io import StringIO
+import os
+
+from tpustat.core import (
+    TPUStatCollection,
+    _device_paths,
+    _normalize_snapshot,
+    _scan_device_owners,
+    format_device_line,
+    format_header,
+)
+
+
+def test_normalize_snapshot_attaches_processes(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    assert snapshot.num_chips == 2
+    assert len(snapshot.devices) == 2
+    assert snapshot.devices[0].processes[0].pid == 1234
+    assert snapshot.devices[1].processes == []
+
+
+def test_format_device_line_default(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    line = format_device_line(snapshot.devices[0], show_cmd=True, show_pid=True)
+
+    assert "[0]" in line
+    assert "TPU v6e" in line
+    assert "42.5%" in line
+    assert "512 / 32768 MiB" in line
+    assert "python/1234(512M)" in line
+
+
+def test_format_device_line_show_all(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    line = format_device_line(snapshot.devices[0], show_all=True)
+
+    assert "0000:00:04.0" in line
+    assert "NUMA 0" in line
+    assert "IOMMU 0" in line
+
+
+def test_collection_print_formatted(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+    stats = TPUStatCollection(snapshot)
+    buf = StringIO()
+
+    stats.print_formatted(buf, show_cmd=True, show_pid=True, force_color=False, no_color=True)
+    output = buf.getvalue()
+
+    assert "TPU v6e x2" in output
+    assert "python/1234(512M)" in output
+    assert "idle" in output
+
+
+def test_format_header_contains_chip_summary(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    header = format_header(snapshot)
+
+    assert "[TPU v6e x2]" in header
+    assert "vfio-pci" not in header
+
+
+def test_format_device_line_respects_name_width(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    line = format_device_line(snapshot.devices[0], tpuname_width=6)
+
+    assert "TPU..." in line
+
+
+def test_device_paths_include_vfio_and_iommu(raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    path_map = _device_paths(snapshot.devices, chip_type_name=snapshot.chip_type_name)
+
+    assert path_map["/dev/vfio/0"] == 0
+    assert path_map["/dev/vfio/1"] == 1
+
+
+def test_scan_device_owners(monkeypatch, raw_snapshot):
+    snapshot = _normalize_snapshot(raw_snapshot)
+
+    monkeypatch.setattr("tpustat.core._iter_proc_fd_links", lambda: ["/proc/2000/fd/7", "/proc/2001/fd/8"])
+
+    def fake_readlink(path: str) -> str:
+        return {
+            "/proc/2000/fd/7": "/dev/vfio/0",
+            "/proc/2001/fd/8": "/dev/vfio/1",
+        }[path]
+
+    monkeypatch.setattr(os, "readlink", fake_readlink)
+
+    owners = _scan_device_owners(snapshot.devices, chip_type_name=snapshot.chip_type_name)
+
+    assert owners == {0: [2000], 1: [2001]}

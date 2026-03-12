@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tpustat"
+version = "0.1.0"
+description = "A gpustat-style TPU status CLI built on top of google-smi."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Ryan"}]
+keywords = ["tpu", "google-smi", "monitoring", "cli", "status"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: System :: Monitoring",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "psutil>=5.9",
+  "shtab>=1.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ryan/tpustat"
+Repository = "https://github.com/ryan/tpustat"
+
+[project.scripts]
+tpustat = "tpustat.cli:main"
+
+[tool.setuptools]
+packages = ["tpustat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
