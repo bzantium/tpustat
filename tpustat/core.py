@@ -37,6 +37,16 @@ def _shorten(text: str, width: int) -> str:
     return (text[: width - 3] + "...").ljust(width)
 
 
+def _normalize_pcie_text(gen: str, width: str) -> tuple[str, str]:
+    normalized_gen = gen.strip()
+    normalized_width = width.strip()
+    if normalized_gen.lower() == "unknown":
+        normalized_gen = ""
+    if normalized_width in {"", "x0", "0", "x255", "255"}:
+        normalized_width = ""
+    return normalized_gen, normalized_width
+
+
 @dataclass
 class TPUProcess:
     device_id: int
@@ -318,6 +328,10 @@ def _normalize_snapshot(raw: dict[str, Any], *, debug: bool = False) -> TPUSnaps
     devices = []
     for entry in raw.get("devices", []):
         index = int(entry.get("device_id", 0))
+        pcie_gen, pcie_width = _normalize_pcie_text(
+            str(entry.get("pcie_gen", "")),
+            str(entry.get("pcie_width", "")),
+        )
         devices.append(
             TPUDevice(
                 index=index,
@@ -325,8 +339,8 @@ def _normalize_snapshot(raw: dict[str, Any], *, debug: bool = False) -> TPUSnaps
                 bus_id=str(entry.get("bus_id", "unknown")),
                 numa_node=int(entry.get("numa_node", 0)),
                 iommu_group=int(entry.get("iommu_group", 0)),
-                pcie_gen=str(entry.get("pcie_gen", "")),
-                pcie_width=str(entry.get("pcie_width", "")),
+                pcie_gen=pcie_gen,
+                pcie_width=pcie_width,
                 power_draw_w=float(entry.get("power_draw_w", 0.0) or 0.0),
                 power_cap_w=float(entry.get("power_cap_w", 0.0) or 0.0),
                 hbm_used_mib=float(entry.get("hbm_used_mib", 0.0) or 0.0),

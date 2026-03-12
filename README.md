@@ -7,12 +7,7 @@
 
 It turns the verbose TPU table into a compact one-line-per-device view, while still supporting JSON output, watch mode, and richer process details when needed. By default it uses the local `google_smi` Python package and falls back to `google-smi --json`.
 
-![Color preview](assets/tpustat-preview.svg)
-
-```text
-t1v-n-a839d305-w-0  Thu Mar 12 01:58:21 2026  [TPU v6e x8]
-[0] TPU v6e          |   0.0% |   406 / 31995 MiB | python(406M)
-```
+![Color preview](assets/tpustat-preview.png)
 
 ## Install
 
@@ -47,17 +42,3 @@ tpustat -i 0.5
 tpustat --print-completion bash
 tpustat --print-completion zsh
 ```
-
-## What’s Different From `google-smi`
-
-- One-line `gpustat`-style layout instead of a full boxed table
-- Per-process display optimized for quick scanning
-- Direct `/proc/*/fd` process-owner scanning to enrich TPU process attribution
-- Optional fallback to `google-smi --json` when the Python collector is unavailable
-
-## Notes
-
-- `--show-all` expands device and process detail for each TPU line.
-- `--tpuname-width` controls TPU name truncation in the compact view.
-- `--no-processes` suppresses process information entirely.
-- Color output follows TTY detection unless overridden with `--force-color` or `--no-color`.
