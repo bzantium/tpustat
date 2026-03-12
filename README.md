@@ -1,40 +1,61 @@
 # tpustat
 
-`tpustat` is a small TPU status CLI in the same spirit as `gpustat`:
+`tpustat` is the TPU equivalent of the `gpustat` workflow:
 
 - `nvidia-smi` -> `gpustat`
 - `google-smi` -> `tpustat`
 
-It prefers the local `google_smi` Python package when present, then falls back to `google-smi --json`.
+It turns the verbose TPU table into a compact one-line-per-device view, while still supporting JSON output, watch mode, and richer process details when needed. By default it uses the local `google_smi` Python package and falls back to `google-smi --json`.
 
-## Usage
-
-```bash
-tpustat
-tpustat --show-all
-tpustat --show-cmd --show-user --show-pid
-tpustat --tpuname-width 12
-tpustat --json
-tpustat -i 1
-tpustat --print-completion bash
+```text
+t1v-n-a839d305-w-0  Thu Mar 12 01:58:21 2026  [TPU v6e x8]
+[0] TPU v6e          |   0.0% |   406 / 31995 MiB | python(406M)
 ```
 
-## Notes
-
-- `--show-all` expands the process fields in addition to bus-level device details.
-- Process ownership is merged from `google-smi` output and direct `/proc/*/fd` device-owner scanning.
-- If `google_smi` cannot be imported, `tpustat` falls back to `google-smi --json`.
-
-## Installation
+## Install
 
 ```bash
+# install from GitHub
+pip install git+https://github.com/bzantium/tpustat.git
+
+# or install locally for development
 pip install -e .
-tpustat --help
 ```
 
-## Shell Completion
+## Quick Start
 
 ```bash
+# compact default view
+tpustat
+
+# include bus / NUMA / IOMMU / PCIe details
+tpustat --show-all
+
+# show explicit process fields
+tpustat -c -u -p
+
+# machine-readable output
+tpustat --json
+
+# refresh continuously
+tpustat -i
+tpustat -i 0.5
+
+# generate shell completion
 tpustat --print-completion bash
 tpustat --print-completion zsh
 ```
+
+## What’s Different From `google-smi`
+
+- One-line `gpustat`-style layout instead of a full boxed table
+- Per-process display optimized for quick scanning
+- Direct `/proc/*/fd` process-owner scanning to enrich TPU process attribution
+- Optional fallback to `google-smi --json` when the Python collector is unavailable
+
+## Notes
+
+- `--show-all` expands device and process detail for each TPU line.
+- `--tpuname-width` controls TPU name truncation in the compact view.
+- `--no-processes` suppresses process information entirely.
+- Color output follows TTY detection unless overridden with `--force-color` or `--no-color`.

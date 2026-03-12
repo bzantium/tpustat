@@ -13,8 +13,14 @@ from tpustat.core import (
 )
 
 
-def test_normalize_snapshot_attaches_processes(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def _no_device_owners(devices, chip_type_name):
+    del devices, chip_type_name
+    return {}
+
+
+def test_normalize_snapshot_attaches_processes(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     assert snapshot.num_chips == 2
     assert len(snapshot.devices) == 2
@@ -22,8 +28,9 @@ def test_normalize_snapshot_attaches_processes(raw_snapshot):
     assert snapshot.devices[1].processes == []
 
 
-def test_format_device_line_default(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_format_device_line_default(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     line = format_device_line(snapshot.devices[0], show_cmd=True, show_pid=True)
 
@@ -34,8 +41,9 @@ def test_format_device_line_default(raw_snapshot):
     assert "python/1234(512M)" in line
 
 
-def test_format_device_line_show_all(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_format_device_line_show_all(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     line = format_device_line(snapshot.devices[0], show_all=True)
 
@@ -44,8 +52,9 @@ def test_format_device_line_show_all(raw_snapshot):
     assert "IOMMU 0" in line
 
 
-def test_collection_print_formatted(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_collection_print_formatted(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
     stats = TPUStatCollection(snapshot)
     buf = StringIO()
 
@@ -57,8 +66,9 @@ def test_collection_print_formatted(raw_snapshot):
     assert "idle" in output
 
 
-def test_format_header_contains_chip_summary(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_format_header_contains_chip_summary(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     header = format_header(snapshot)
 
@@ -66,16 +76,18 @@ def test_format_header_contains_chip_summary(raw_snapshot):
     assert "vfio-pci" not in header
 
 
-def test_format_device_line_respects_name_width(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_format_device_line_respects_name_width(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     line = format_device_line(snapshot.devices[0], tpuname_width=6)
 
     assert "TPU..." in line
 
 
-def test_device_paths_include_vfio_and_iommu(raw_snapshot):
-    snapshot = _normalize_snapshot(raw_snapshot)
+def test_device_paths_include_vfio_and_iommu(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
+    snapshot = _normalize_snapshot(raw_snapshot, debug=False)
 
     path_map = _device_paths(snapshot.devices, chip_type_name=snapshot.chip_type_name)
 
@@ -84,6 +96,7 @@ def test_device_paths_include_vfio_and_iommu(raw_snapshot):
 
 
 def test_scan_device_owners(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", _no_device_owners)
     snapshot = _normalize_snapshot(raw_snapshot)
 
     monkeypatch.setattr("tpustat.core._iter_proc_fd_links", lambda: ["/proc/2000/fd/7", "/proc/2001/fd/8"])

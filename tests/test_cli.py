@@ -9,7 +9,8 @@ from tpustat.core import TPUStatCollection, _normalize_snapshot
 
 
 @pytest.fixture
-def stats(raw_snapshot):
+def stats(monkeypatch, raw_snapshot):
+    monkeypatch.setattr("tpustat.core._scan_device_owners", lambda devices, chip_type_name: {})
     return TPUStatCollection(_normalize_snapshot(raw_snapshot))
 
 
