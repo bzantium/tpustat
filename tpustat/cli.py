@@ -4,6 +4,7 @@ import argparse
 import signal
 import sys
 import time
+from io import StringIO
 
 try:
     import shtab
@@ -16,32 +17,53 @@ from tpustat.core import (
     clear_screen,
     clear_to_end,
     hide_cursor,
-    move_cursor_home,
     show_cursor,
 )
 
 
 def print_tpustat(*, json: bool = False, **kwargs: object) -> None:
+    stream = kwargs.pop("stream", sys.stdout)
+    color_stream = kwargs.pop("color_stream", stream)
     debug = bool(kwargs.pop("debug", False))
     stats = TPUStatCollection.new_query(id=kwargs.pop("id", None), debug=debug)
     if json:
-        stats.print_json(sys.stdout)
+        stats.print_json(stream)
     else:
-        stats.print_formatted(sys.stdout, **kwargs)
+        stats.print_formatted(stream, color_stream=color_stream, **kwargs)
+
+
+def _render_frame(**kwargs: object) -> str:
+    buf = StringIO()
+    print_tpustat(stream=buf, color_stream=sys.stdout, **kwargs)
+    return buf.getvalue()
+
+
+def _write_tty_frame(stream: object, frame: str, previous_line_count: int) -> int:
+    lines = frame.splitlines()
+    stream.write("\033[H")
+    for line in lines:
+        stream.write("\033[2K")
+        stream.write(line)
+        stream.write("\n")
+    for _ in range(max(0, previous_line_count - len(lines))):
+        stream.write("\033[2K\n")
+    clear_to_end(stream)
+    return len(lines)
 
 
 def loop_tpustat(interval: float, **kwargs: object) -> int:
     is_tty = bool(getattr(sys.stdout, "isatty", lambda: False)())
+    previous_line_count = 0
     try:
         if is_tty:
             clear_screen(sys.stdout)
             hide_cursor(sys.stdout)
         while True:
             if is_tty:
-                move_cursor_home(sys.stdout)
-            print_tpustat(**kwargs)
-            if is_tty:
-                clear_to_end(sys.stdout)
+                frame = _render_frame(**kwargs)
+                previous_line_count = _write_tty_frame(sys.stdout, frame, previous_line_count)
+            else:
+                print_tpustat(**kwargs)
             sys.stdout.flush()
             time.sleep(interval)
     except KeyboardInterrupt:

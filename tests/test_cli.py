@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from io import StringIO
 
 import pytest
 
@@ -90,3 +91,37 @@ def test_parser_has_completion_flag(capsys):
     assert exc.value.code == 0
     assert "tpustat" in captured.out
     assert "complete " in captured.out or "#compdef tpustat" in captured.out
+
+
+def test_write_tty_frame_clears_stale_line_content():
+    buf = StringIO()
+
+    line_count = cli._write_tty_frame(
+        buf,
+        "header\n[0] TPU v6e | 5758 / 31995 MiB | pid(5758M) train.py(5758M)\n",
+        previous_line_count=0,
+    )
+    line_count = cli._write_tty_frame(
+        buf,
+        "header\n[0] TPU v6e |    0 / 32768 MiB | idle\n",
+        previous_line_count=line_count,
+    )
+    output = buf.getvalue()
+
+    assert line_count == 2
+    assert "\033[2K[0] TPU v6e |    0 / 32768 MiB | idle\n" in output
+    assert "idle5758M) train.py(5758M)" not in output
+
+
+def test_print_tpustat_uses_color_stream_for_buffered_output(monkeypatch, stats):
+    class FakeTTY(StringIO):
+        def isatty(self) -> bool:
+            return True
+
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setattr(cli.TPUStatCollection, "new_query", classmethod(lambda cls, id=None, debug=False: stats))
+
+    buf = StringIO()
+    cli.print_tpustat(stream=buf, color_stream=FakeTTY())
+
+    assert "\033[" in buf.getvalue()

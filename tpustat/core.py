@@ -229,9 +229,12 @@ class TPUStatCollection(Sequence[TPUDevice]):
         force_color: bool = False,
         no_color: bool = False,
         tpuname_width: int = 16,
+        color_stream: Any | None = None,
         eol_char: str = os.linesep,
     ) -> None:
-        color = should_use_color(force_color=force_color, no_color=no_color, stream=fp)
+        if color_stream is None:
+            color_stream = fp
+        color = should_use_color(force_color=force_color, no_color=no_color, stream=color_stream)
         if show_header:
             fp.write(format_header(self.snapshot, color=color))
             fp.write(eol_char)
