@@ -7,7 +7,6 @@ from tpustat.core import (
     TPUStatCollection,
     _device_paths,
     _normalize_snapshot,
-    _normalize_pcie_text,
     _scan_device_owners,
     format_device_line,
     format_header,
@@ -51,7 +50,7 @@ def test_format_device_line_show_all(monkeypatch, raw_snapshot):
     assert "0000:00:04.0" in line
     assert "NUMA 0" in line
     assert "IOMMU 0" in line
-    assert "PCIe n/a" in line
+    assert "PCIe" not in line
 
 
 def test_collection_print_formatted(monkeypatch, raw_snapshot):
@@ -114,9 +113,3 @@ def test_scan_device_owners(monkeypatch, raw_snapshot):
     owners = _scan_device_owners(snapshot.devices, chip_type_name=snapshot.chip_type_name)
 
     assert owners == {0: [2000], 1: [2001]}
-
-
-def test_normalize_pcie_text_hides_invalid_placeholders():
-    assert _normalize_pcie_text("Unknown", "x0") == ("", "")
-    assert _normalize_pcie_text("", "x255") == ("", "")
-    assert _normalize_pcie_text("Gen5", "x16") == ("Gen5", "x16")

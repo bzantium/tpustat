@@ -25,7 +25,7 @@ pip install -e .
 # compact default view
 tpustat
 
-# include bus / NUMA / IOMMU / PCIe details
+# include bus / NUMA / IOMMU details
 tpustat --show-all
 
 # show explicit process fields

@@ -59,7 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser_color.add_argument("--force-color", "--color", action="store_true", help="Force colored output")
     parser_color.add_argument("--no-color", action="store_true", help="Disable colored output")
     parser.add_argument("--id", help="Target a specific TPU index or comma-separated indices")
-    parser.add_argument("-a", "--show-all", action="store_true", help="Show bus, NUMA, IOMMU, and PCIe details")
+    parser.add_argument("-a", "--show-all", action="store_true", help="Show bus, NUMA, and IOMMU details")
     parser.add_argument("-c", "--show-cmd", action="store_true", help="Display process command names")
     parser.add_argument("-u", "--show-user", action="store_true", help="Display process owners")
     parser.add_argument("-p", "--show-pid", action="store_true", help="Display process IDs")

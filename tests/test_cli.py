@@ -24,6 +24,8 @@ def test_cli_json_output(monkeypatch, capsys, stats):
     payload = json.loads(captured.out)
     assert payload["chip_type_name"] == "v6e"
     assert payload["devices"][0]["index"] == 0
+    assert "pcie_gen" not in payload["devices"][0]
+    assert "pcie_width" not in payload["devices"][0]
 
 
 def test_cli_text_output(monkeypatch, capsys, stats):

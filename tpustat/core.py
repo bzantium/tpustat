@@ -37,16 +37,6 @@ def _shorten(text: str, width: int) -> str:
     return (text[: width - 3] + "...").ljust(width)
 
 
-def _normalize_pcie_text(gen: str, width: str) -> tuple[str, str]:
-    normalized_gen = gen.strip()
-    normalized_width = width.strip()
-    if normalized_gen.lower() == "unknown":
-        normalized_gen = ""
-    if normalized_width in {"", "x0", "0", "x255", "255"}:
-        normalized_width = ""
-    return normalized_gen, normalized_width
-
-
 @dataclass
 class TPUProcess:
     device_id: int
@@ -84,8 +74,6 @@ class TPUDevice:
     bus_id: str
     numa_node: int
     iommu_group: int
-    pcie_gen: str
-    pcie_width: str
     power_draw_w: float
     power_cap_w: float
     hbm_used_mib: float
@@ -192,8 +180,7 @@ def format_device_line(
 
     sections = [f"{left} {name} | {util} | {mem_used} / {mem_total} MiB"]
     if show_all:
-        pcie = " ".join(part for part in [device.pcie_gen, device.pcie_width] if part).strip() or "n/a"
-        sections.append(f"{device.bus_id} | NUMA {device.numa_node} | IOMMU {device.iommu_group} | PCIe {pcie}")
+        sections.append(f"{device.bus_id} | NUMA {device.numa_node} | IOMMU {device.iommu_group}")
     if not no_processes:
         proc_text = _processes_for_display(
             device,
@@ -328,10 +315,6 @@ def _normalize_snapshot(raw: dict[str, Any], *, debug: bool = False) -> TPUSnaps
     devices = []
     for entry in raw.get("devices", []):
         index = int(entry.get("device_id", 0))
-        pcie_gen, pcie_width = _normalize_pcie_text(
-            str(entry.get("pcie_gen", "")),
-            str(entry.get("pcie_width", "")),
-        )
         devices.append(
             TPUDevice(
                 index=index,
@@ -339,8 +322,6 @@ def _normalize_snapshot(raw: dict[str, Any], *, debug: bool = False) -> TPUSnaps
                 bus_id=str(entry.get("bus_id", "unknown")),
                 numa_node=int(entry.get("numa_node", 0)),
                 iommu_group=int(entry.get("iommu_group", 0)),
-                pcie_gen=pcie_gen,
-                pcie_width=pcie_width,
                 power_draw_w=float(entry.get("power_draw_w", 0.0) or 0.0),
                 power_cap_w=float(entry.get("power_cap_w", 0.0) or 0.0),
                 hbm_used_mib=float(entry.get("hbm_used_mib", 0.0) or 0.0),
