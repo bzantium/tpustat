@@ -1,14 +1,14 @@
-<svg width="960" height="160" viewBox="0 0 960 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="1200" height="160" viewBox="0 0 1200 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">tpustat terminal preview</title>
   <desc id="desc">A colorful terminal-style preview of tpustat output showing a TPU host header and one compact device line.</desc>
-  <rect width="960" height="160" rx="16" fill="#111827"/>
-  <rect x="18" y="16" width="924" height="128" rx="12" fill="#0B1220" stroke="#1F2937"/>
+  <rect width="1200" height="160" rx="16" fill="#111827"/>
+  <rect x="18" y="16" width="1164" height="128" rx="12" fill="#0B1220" stroke="#1F2937"/>
   <circle cx="42" cy="37" r="6" fill="#F87171"/>
   <circle cx="62" cy="37" r="6" fill="#FBBF24"/>
   <circle cx="82" cy="37" r="6" fill="#34D399"/>
   <text x="36" y="72" fill="#F9FAFB" font-family="Menlo, Consolas, 'Liberation Mono', monospace" font-size="20" xml:space="preserve">
     <tspan font-weight="700">t1v-n-a839d305-w-0</tspan>
-    <tspan fill="#D1D5DB">  Thu Mar 12 02:06:20 2026  </tspan>
+    <tspan fill="#D1D5DB">  Thu Mar 12 02:05:27 2026  </tspan>
     <tspan fill="#22D3EE">[TPU v6e x8]</tspan>
   </text>
   <text x="36" y="108" fill="#F9FAFB" font-family="Menlo, Consolas, 'Liberation Mono', monospace" font-size="20" xml:space="preserve">
@@ -21,7 +21,7 @@
     <tspan fill="#FBBF24" font-weight="700">21974</tspan>
     <tspan fill="#D1D5DB"> / </tspan>
     <tspan fill="#F59E0B">31995</tspan>
-    <tspan fill="#D1D5DB"> MiB | 0000:00:04.0 | NUMA 0 | IOMMU 0 | PCIe x0 | </tspan>
-    <tspan fill="#9CA3AF">ryan:python/2966982(21974M)</tspan>
+    <tspan fill="#D1D5DB"> MiB | </tspan>
+    <tspan fill="#9CA3AF">python/2966982(21974M)</tspan>
   </text>
 </svg>
