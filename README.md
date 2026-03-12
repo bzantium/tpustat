@@ -7,6 +7,8 @@
 
 It turns the verbose TPU table into a compact one-line-per-device view, while still supporting JSON output, watch mode, and richer process details when needed. By default it uses the local `google_smi` Python package and falls back to `google-smi --json`.
 
+![Color preview](assets/tpustat-preview.svg)
+
 ```text
 t1v-n-a839d305-w-0  Thu Mar 12 01:58:21 2026  [TPU v6e x8]
 [0] TPU v6e          |   0.0% |   406 / 31995 MiB | python(406M)
