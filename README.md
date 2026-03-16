@@ -12,11 +12,7 @@ It turns the verbose TPU table into a compact one-line-per-device view, while st
 ## Install
 
 ```bash
-# install from GitHub
-pip install git+https://github.com/bzantium/tpustat.git
-
-# or install locally for development
-pip install -e .
+pip install tpustat
 ```
 
 ## Quick Start
